@@ -1,0 +1,87 @@
+---
+title: "CAS-ADS"
+output: html_document
+date: "2024-09-14"
+---
+
+```{r}
+library(ggplot2)
+
+x <- read.delim("~/Documents/CAS-ADS/M2_Statistics/Project/FINAL sentiment and price per day.txt")
+x1 <- data.frame(vader_running_avg = x[1:(nrow(x) - 1), 1], Close_running_avg = x[2:nrow(x), 2])
+x2 <- data.frame(vader_running_avg = x[1:(nrow(x) - 2), 1], Close_running_avg = x[3:nrow(x), 2])
+x3 <- data.frame(vader_running_avg = x[1:(nrow(x) - 3), 1], Close_running_avg = x[4:nrow(x), 2])
+x4 <- data.frame(vader_running_avg = x[1:(nrow(x) - 4), 1], Close_running_avg = x[5:nrow(x), 2])
+x5 <- data.frame(vader_running_avg = x[1:(nrow(x) - 5), 1], Close_running_avg = x[6:nrow(x), 2])
+x6 <- data.frame(vader_running_avg = x[1:(nrow(x) - 6), 1], Close_running_avg = x[7:nrow(x), 2])
+x7 <- data.frame(vader_running_avg = x[1:(nrow(x) - 7), 1], Close_running_avg = x[8:nrow(x), 2])
+x8 <- data.frame(vader_running_avg = x[1:(nrow(x) - 8), 1], Close_running_avg = x[9:nrow(x), 2])
+x9 <- data.frame(vader_running_avg = x[1:(nrow(x) - 9), 1], Close_running_avg = x[10:nrow(x), 2])
+x10 <- data.frame(vader_running_avg = x[1:(nrow(x) - 10), 1], Close_running_avg = x[11:nrow(x), 2])
+x11 <- data.frame(vader_running_avg = x[1:(nrow(x) - 11), 1], Close_running_avg = x[12:nrow(x), 2])
+x12 <- data.frame(vader_running_avg = x[1:(nrow(x) - 12), 1], Close_running_avg = x[13:nrow(x), 2])
+x13 <- data.frame(vader_running_avg = x[1:(nrow(x) - 13), 1], Close_running_avg = x[14:nrow(x), 2])
+x14 <- data.frame(vader_running_avg = x[1:(nrow(x) - 14), 1], Close_running_avg = x[15:nrow(x), 2])
+x15 <- data.frame(vader_running_avg = x[1:(nrow(x) - 15), 1], Close_running_avg = x[16:nrow(x), 2])
+x16 <- data.frame(vader_running_avg = x[1:(nrow(x) - 16), 1], Close_running_avg = x[17:nrow(x), 2])
+x17 <- data.frame(vader_running_avg = x[1:(nrow(x) - 17), 1], Close_running_avg = x[18:nrow(x), 2])
+x18 <- data.frame(vader_running_avg = x[1:(nrow(x) - 18), 1], Close_running_avg = x[19:nrow(x), 2])
+x19 <- data.frame(vader_running_avg = x[1:(nrow(x) - 19), 1], Close_running_avg = x[20:nrow(x), 2])
+x20 <- data.frame(vader_running_avg = x[1:(nrow(x) - 20), 1], Close_running_avg = x[21:nrow(x), 2])
+
+cor(x1)["vader_running_avg","Close_running_avg"]
+cor(x2)["vader_running_avg","Close_running_avg"]
+
+
+data_frames <- list(x, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20)
+
+cor_results <- numeric(length(data_frames))
+
+for (i in 1:length(data_frames)) {cor_results[i] <- cor(data_frames[[i]])["vader_running_avg", "Close_running_avg"]}
+
+# View the results
+print(cor_results)
+
+x_values <- 1:length(cor_results)
+
+max_index <- which.max(cor_results)
+max_value <- cor_results[max_index]
+
+plot(x_values, cor_results, type = "o", col = "blue", xlab = "Lag", ylab = "Correlation", main = "Correlation between vader_running_avg and Close_running_avg", lwd = 2)
+points(max_index, max_value, col = "red", pch = 19, cex = 1.5)
+
+### max of cor is at day 9
+
+summary(lm(Close_running_avg ~ vader_running_avg, data = x9))[4]
+
+#                  Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)        197.955      1.919  103.17   <2e-16 ***
+#vader_running_avg  136.849     12.229   11.19   <2e-16 ***
+#The intercept is 197.955, meaning when x is 0, y is expected to be 197.955.
+#The slope for x is 136.849, indicating that for every unit increase in x, y is expected to increase by 136.849 units.
+
+
+
+lm_results <- numeric(length(data_frames))
+
+for (i in 1:length(data_frames)) {lm_results[i] <- summary(lm(Close_running_avg ~ vader_running_avg, data = data_frames[[i]])) [4]}
+
+slopes <- numeric(length(data_frames))
+for (i in 1:length(lm_results)) {slopes[i] <- lm_results[[i]][2,1]}
+
+max_slopindex <- which.max(slopes)
+max_slopvalue <- slopes[max_slopindex]
+
+plot(x_values, slopes, type = "o", col = "blue", xlab = "Lag", ylab = "Regression", main = "Slope of Regression between vader_running_avg and Close_running_avg", lwd = 2)
+points(max_slopindex, max_slopvalue, col = "red", pch = 19, cex = 1.5)
+
+
+pval <- numeric(length(data_frames))
+for (i in 1:length(lm_results)) {pval[i] <- lm_results[[i]][2,4]}
+
+min_pvalindex <- which.min(pval)
+min_pvalvalue <- pval[min_pvalindex]
+
+plot(x_values, pval, type = "o", col = "blue", xlab = "Lag", ylab = "Regression", main = "P value of Regression between vader_running_avg and Close_running_avg", lwd = 2)
+points(min_pvalindex, min_pvalvalue, col = "red", pch = 19, cex = 1.5)
+``` 
